@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.kasilov.andrew.solidrobot.MainActivity">
+
+
+    <TextView
+        android:id="@+id/tv_indicator_robot_on"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Robot off"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_indicator_battery_plugged_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Battery plugged out"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_robot_on" />
+
+    <TextView
+        android:id="@+id/tv_indicator_charging"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Not charging"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_battery_discharged" />
+
+    <TextView
+        android:id="@+id/tv_indicator_moving"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Not moving"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_charging" />
+
+    <TextView
+        android:id="@+id/tv_indicator_reached_the_destination"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="The destination is not reached"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_moving" />
+
+    <TextView
+        android:id="@+id/tv_indicator_battery_discharged"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Battery discharged"
+        android:textColor="@color/colorRed"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_battery_plugged_in" />
+
+    <ToggleButton
+        android:id="@+id/switch_turn_on_off"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:textOff="Turn On robot"
+        android:textOn="Turn off robot"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_reached_the_destination" />
+
+    <ToggleButton
+        android:id="@+id/switch_battery_plugged"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:textOff="Plug in new type battery"
+        android:textOn="Plug out new type battery"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_turn_on_off" />
+
+    <ToggleButton
+        android:id="@+id/switch_plug_chrging_device"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:textOff="Plug in charging device"
+        android:textOn="Plug out charging device"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toggleButton" />
+
+    <Button
+        android:id="@+id/btn_move"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:text="Move"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_plug_chrging_device" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="0dp"
+        android:layout_height="511dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5052083"
+        tools:layout_editor_absoluteX="194dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintRight_toLeftOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/tv_indicator_battery_plugged_in"
+        app:srcCompat="@drawable/red_circle" />
+
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:text="ToggleButton"
+        android:textOff="plug in old type battery"
+        android:textOn="plug out old type battery"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch_battery_plugged" />
+
+
+</android.support.constraint.ConstraintLayout>
