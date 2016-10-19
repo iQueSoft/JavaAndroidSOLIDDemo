@@ -1,37 +1,36 @@
 package com.kasilov.andrew.solidrobot;
 
+import com.kasilov.andrew.solidrobot.interfaces.IBatteryIndicator;
+import com.kasilov.andrew.solidrobot.interfaces.IBatteryStatus;
+
 public class NewBattery extends Battery {
 
 
-    public boolean isIndicatorTurnedOn() {
-        return indicatorTurnedOn;
-    }
-    private boolean indicatorTurnedOn;
+    private IBatteryIndicator iBatteryIndicator;
+    private int chargeLevel = 0;
 
-    private boolean plugged= false;
-    private boolean charged = false;
-    public void setPlugged(boolean plugged) {
-        this.plugged = plugged;
-    }
 
-    public void setCharged(boolean charged) {
-        this.charged = charged;
-    }
-
-    public boolean isCharged() {
-        return charged;
-    }
-
-    public boolean isPlugged() {
-        return plugged;
-    }
-    @Override
-    void charge() {
-
+    public NewBattery(IBatteryIndicator iBatteryIndicator, IBatteryStatus iBatteryStatus) {
+        this.iBatteryIndicator = iBatteryIndicator;
+        this.iBatteryStatus = iBatteryStatus;
+        this.setCharged(false);
     }
 
     @Override
-    protected void turnOnIndicator() {
-        super.turnOnIndicator();
+    public void charge() {
+        this.iBatteryIndicator.turnOffIndicator();
+        new BatteryCharging().execute(10);
+    }
+
+
+    @Override
+    public int getChargeLevel() {
+        return this.chargeLevel;
+    }
+
+    @Override
+    void notifyBatteriesChargingIsFinished(Integer chargeLevel) {
+        this.chargeLevel = chargeLevel;
+        this.iBatteryIndicator.turnOnIndicator();
     }
 }

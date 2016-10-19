@@ -3,193 +3,197 @@ package com.kasilov.andrew.solidrobot;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener {
+import com.kasilov.andrew.solidrobot.interfaces.IErrorState;
+import com.kasilov.andrew.solidrobot.interfaces.IViewControl;
 
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, View.OnClickListener, IViewControl {
 
-    private static final String LOG = "ROBOT_LOG";
-    Robot robot;
-    private NewBattery newBattery;
-    private TextView robotIndicator, battery_plugged, battery_discharged, charging, moving, reachedDestination;
-    private int alreadyMoved = 170;
-    private boolean destinationReached = false;
-    ImageView imageView;
-    private OldBattery oldBattery;
-    private ChargingDevice chargingDevice;
+    private TextView tv_robot_power;
+    private TextView tv_battery_inject_state;
+    private TextView tv_battery_charge_state;
+    private TextView tv_charging_state;
+    private TextView tv_robot_movement_state;
+    private ImageView iv_battery_indicator;
+    private ToggleButton btn_robot_power;
+    private ToggleButton btn_plug_charging_device;
+    private Presenter presenter;
+
+    private IErrorState iErrorState = new IErrorState() {
+        @Override
+        public void onError(String message) {
+            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        imageView = (ImageView) findViewById(R.id.imageView);
-        robotIndicator = (TextView) findViewById(R.id.tv_indicator_robot_on);
-        battery_plugged = (TextView) findViewById(R.id.tv_indicator_battery_plugged_in);
-        battery_discharged = (TextView) findViewById(R.id.tv_indicator_battery_discharged);
-        charging = (TextView) findViewById(R.id.tv_indicator_charging);
-        moving = (TextView) findViewById(R.id.tv_indicator_moving);
-        reachedDestination = (TextView) findViewById(R.id.tv_indicator_reached_the_destination);
-        ToggleButton btn_robot_power = (ToggleButton) findViewById(R.id.switch_turn_on_off);
-        ToggleButton btn_battery_plugged = (ToggleButton) findViewById(R.id.switch_battery_plugged);
-        ToggleButton btn_plug_charging_device = (ToggleButton) findViewById(R.id.switch_plug_chrging_device);
-        ToggleButton btn_old_type_battery = (ToggleButton) findViewById(R.id.toggleButton);
-        btn_old_type_battery.setOnCheckedChangeListener(this);
-        btn_robot_power.setOnCheckedChangeListener(this);
-        btn_battery_plugged.setOnCheckedChangeListener(this);
-        btn_plug_charging_device.setOnCheckedChangeListener(this);
-        robot = new Robot();
-        chargingDevice = new ChargingDevice();
-        newBattery = new NewBattery();
-        oldBattery = new OldBattery();
-        (findViewById(R.id.btn_move)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (robot.turnedOn) {
-                    if (!robot.getChargingDevice().isPluggedIn()) {
-                        robot.getBattery().setCharged(false);
-                        battery_discharged.setText("Battery discharged");
-                        battery_discharged.setTextColor(getResources().getColor(R.color.colorRed));
-                        imageView.setImageResource(R.drawable.red_circle);
-                        if (robot.getBattery().isIndicatorTurnedOn()) {
-                            imageView.setImageResource(R.drawable.red_circle);
-                            try {
-                                robot.getBattery().turnOffIndicator();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        alreadyMoved -= robot.getBattery().chargeLevel;
-                        if (alreadyMoved < 0) {
-                            destinationReached = true;
-                        }else
-                        {
-                            Toast.makeText(MainActivity.this, "Insert another battery", Toast.LENGTH_LONG).show();
-                        }
-                        if (destinationReached) {
-                            reachedDestination.setText("Destination reached");
-                            reachedDestination.setTextColor(getResources().getColor(R.color.colorGreen));
-                            Toast.makeText(getApplicationContext(), "Destination reached. Battery level " + Math.abs(alreadyMoved), Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Charging device is plugged in", Toast.LENGTH_LONG).show();
-                    }
-                } else {
-                    Toast.makeText(getApplicationContext(), "Robot is turned off", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
+        initializeViews();
+        presenter = new Presenter(this, iErrorState);
     }
 
+
+    private void initializeViews() {
+        iv_battery_indicator = (ImageView) findViewById(R.id.imv_battery_indicator);
+        tv_robot_power = (TextView) findViewById(R.id.tv_indicator_robot_on);
+        tv_battery_inject_state = (TextView) findViewById(R.id.tv_indicator_battery_plugged_in);
+        tv_battery_charge_state = (TextView) findViewById(R.id.tv_indicator_battery_discharged);
+        tv_charging_state = (TextView) findViewById(R.id.tv_indicator_charging);
+        tv_robot_movement_state = (TextView) findViewById(R.id.tv_indicator_moving);
+        btn_robot_power = (ToggleButton) findViewById(R.id.btn_robot_power);
+        Button btn_new_type_battery_injection = (Button) findViewById(R.id.btn_new_type_battery_injection);
+        btn_plug_charging_device = (ToggleButton) findViewById(R.id.btn_charging_device_injection);
+        Button btn_old_type_battery_injection = (Button) findViewById(R.id.btn_old_type_battery_injection);
+        Button btn_plug_out_battery = (Button) findViewById(R.id.btn_plug_out_battery);
+        btn_plug_out_battery.setOnClickListener(this);
+        btn_old_type_battery_injection.setOnClickListener(this);
+        btn_robot_power.setOnCheckedChangeListener(this);
+        btn_new_type_battery_injection.setOnClickListener(this);
+        btn_plug_charging_device.setOnCheckedChangeListener(this);
+        Button btn_move = (Button) findViewById(R.id.btn_move);
+        btn_move.setOnClickListener(this);
+    }
 
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
         switch (compoundButton.getId()) {
-            case R.id.switch_turn_on_off:
-                if (robot.getBattery().isPlugged()) {
-                    if (robot.getBattery().isCharged()) {
-                        if (isChecked) {
-                            robot.turnedOn = true;
-                            robotIndicator.setText("Robot turned on");
-                            robotIndicator.setTextColor(getResources().getColor(R.color.colorGreen));
-                        } else {
-                            robot.turnedOn = false;
-                            robotIndicator.setText("Robot turned off");
-                            robotIndicator.setTextColor(getResources().getColor(R.color.colorRed));
-                        }
-                    } else {
-                        compoundButton.setChecked(false);
-                        Toast.makeText(this, "Battery discharged", Toast.LENGTH_LONG).show();
-                    }
-
-                } else {
-                    compoundButton.setChecked(false);
-                    Toast.makeText(this, "Battery is not plugged in", Toast.LENGTH_LONG).show();
-                }
+            case R.id.btn_robot_power:
+                if (isChecked) this.presenter.turnOnRobot();
+                else this.presenter.turnOffRobot();
                 break;
-            case R.id.switch_plug_chrging_device:
-                if (robot.getBattery().isPlugged()) {
-                    if (isChecked) {
-                        robot.pluginchargingDevice(chargingDevice);
-                        robot.getChargingDevice().setPLuggedIn(true);
-                        charging.setText("Charging");
-                        charging.setTextColor(getResources().getColor(R.color.colorGreen));
-                        robot.getBattery().setCharged(true);
-                        try {
-                            charging.setText("Charging");
-                            Thread.sleep(4000);
-                            robot.getBattery().chargeLevel = 100;
-                            battery_discharged.setText("Battery is charged");
-                            battery_discharged.setTextColor(getResources().getColor(R.color.colorGreen));
-                            if (!robot.getBattery().isIndicatorTurnedOn()) {
-                                imageView.setImageResource(R.drawable.green_circle);
-                                try {
-                                    robot.getBattery().turnOnIndicator();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    } else {
-                        robot.getChargingDevice().setPLuggedIn(false);
-                        charging.setText("Not charging");
-                        charging.setTextColor(getResources().getColor(R.color.colorRed));
-                    }
-                } else {
-                    compoundButton.setChecked(false);
-                    Toast.makeText(this, "Battery is plugged out", Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.switch_battery_plugged:
-                if (isChecked) {
-                    robot.plugInNewTypeBattery(newBattery);
-                    battery_plugged.setText("New type battery plugged in");
-                    battery_plugged.setTextColor(getResources().getColor(R.color.colorGreen));
-                    robot.getBattery().setPlugged(true);
-                    if (robot.getBattery().isCharged()) {
-                        battery_discharged.setText("New type battery charged");
-                        battery_discharged.setTextColor(getResources().getColor(R.color.colorGreen));
-                        robot.getBattery().setCharged(true);
-                    } else {
-                        battery_discharged.setText("New type battery discharged");
-                        battery_discharged.setTextColor(getResources().getColor(R.color.colorRed));
-                        robot.getBattery().setCharged(false);
-                    }
-                } else {
-                    battery_plugged.setText("New type battery plugged out");
-                    battery_plugged.setTextColor(getResources().getColor(R.color.colorRed));
-                    robot.getBattery().setPlugged(false);
-                }
-                break;
-            case R.id.toggleButton:
-                if (isChecked) {
-                    robot.plugInoldTypeBattery(oldBattery);
-                    battery_plugged.setText("Old type battery plugged in");
-                    battery_plugged.setTextColor(getResources().getColor(R.color.colorGreen));
-                    robot.getBattery().setPlugged(true);
-                    if (robot.getBattery().isCharged()) {
-                        battery_discharged.setText("Old type battery charged");
-                        battery_discharged.setTextColor(getResources().getColor(R.color.colorGreen));
-                        robot.getBattery().setCharged(true);
-                    } else {
-                        battery_discharged.setText("Old type battery discharged");
-                        battery_discharged.setTextColor(getResources().getColor(R.color.colorRed));
-                        robot.getBattery().setCharged(false);
-                    }
-                } else {
-                    battery_plugged.setText("Old type battery plugged out");
-                    battery_plugged.setTextColor(getResources().getColor(R.color.colorRed));
-                    robot.getBattery().setPlugged(false);
-                }
+            case R.id.btn_charging_device_injection:
+                if (isChecked) this.presenter.plugInChargingDevice();
+                else this.presenter.plugOutChargingDevice();
                 break;
         }
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_new_type_battery_injection:
+                this.presenter.plugInNewTypeBattery();
+                break;
+            case R.id.btn_old_type_battery_injection:
+                this.presenter.plugInOldTypeBattery();
+                break;
+            case R.id.btn_plug_out_battery:
+                this.presenter.plugOutBattery();
+                break;
+            case R.id.btn_move:
+                this.presenter.move();
+                break;
+        }
+    }
+
+    @Override
+    public void switchOffPowerButton() {
+        this.btn_robot_power.setChecked(false);
+    }
+
+    @Override
+    public void onRobotTurnedOn() {
+        this.tv_robot_power.setText("Robot is turned on");
+        this.tv_robot_power.setTextColor(this.getColorGreen());
+    }
+
+    @Override
+    public void onRobotTurnedOff() {
+        this.tv_robot_power.setText("Robot is turned off");
+        this.tv_robot_power.setTextColor(this.getColorRed());
+        switchOffPowerButton();
+    }
+
+    @Override
+    public void turnOffBatteryIndicator() {
+        this.iv_battery_indicator.setImageResource(R.drawable.red_circle);
+    }
+
+    @Override
+    public void turnOnBatteryIndicator() {
+        this.iv_battery_indicator.setImageResource(R.drawable.green_circle);
+    }
+
+    @Override
+    public void onBatteryChargingStarted() {
+        this.tv_battery_charge_state.setText("Battery is charging...");
+        this.tv_battery_charge_state.setTextColor(this.getColorYellow());
+    }
+
+    @Override
+    public void onBatteryCharged() {
+        this.tv_battery_charge_state.setText("Battery charged");
+        this.tv_battery_charge_state.setTextColor(this.getColorGreen());
+    }
+
+    @Override
+    public void onBatteryDischarged(int distanceToTravel) {
+        this.tv_battery_charge_state.setText("Battery discharged");
+        this.tv_battery_charge_state.setTextColor(this.getColorRed());
+        Toast.makeText(this, "Battery discharged. " + distanceToTravel + "m left to ride.", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onChargingDevicePluggedIn() {
+        this.tv_charging_state.setText("Charging device is plugged in");
+        this.tv_charging_state.setTextColor(getColorGreen());
+    }
+
+    @Override
+    public void onChargingDevicePluggedOut() {
+        this.btn_plug_charging_device.setChecked(false);
+        this.tv_charging_state.setText("Charging device is not plugged in");
+        this.tv_charging_state.setTextColor(getColorRed());
+    }
+
+    @Override
+    public void onOldTypeBatteryPluggedIn() {
+        this.turnOffBatteryIndicator();
+        this.tv_battery_inject_state.setText("Old type battery plugged in");
+        this.tv_battery_inject_state.setTextColor(this.getColorGreen());
+    }
+
+    @Override
+    public void onNewTypeBatteryPluggedIn() {
+        this.tv_battery_inject_state.setText("New type battery plugged in");
+        this.tv_battery_inject_state.setTextColor(this.getColorGreen());
+    }
+
+    @Override
+    public void onBatteryPluggedOut() {
+        this.turnOffBatteryIndicator();
+        this.tv_battery_charge_state.setText("Battery discharged");
+        this.tv_battery_charge_state.setTextColor(getColorRed());
+        this.tv_battery_inject_state.setText("Battery plugged out");
+        this.tv_battery_inject_state.setTextColor(getColorRed());
+    }
+
+    @Override
+    public void onDestinationReached(int batteryChargeLevel) {
+        this.tv_robot_movement_state.setText("Destination is reached");
+        this.tv_robot_movement_state.setTextColor(getColorGreen());
+        Toast.makeText(this, "Destination is reached. " + batteryChargeLevel + "% left in the battery.", Toast.LENGTH_LONG).show();
+    }
+
+    private int getColorGreen() {
+        return getResources().getColor(R.color.colorGreen);
+    }
+
+    private int getColorRed() {
+        return getResources().getColor(R.color.colorRed);
+    }
+
+    private int getColorYellow() {
+        return getResources().getColor(R.color.colorYellow);
     }
 
 }
