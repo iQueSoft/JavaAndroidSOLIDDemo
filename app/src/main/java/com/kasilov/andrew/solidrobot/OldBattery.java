@@ -1,45 +1,32 @@
 package com.kasilov.andrew.solidrobot;
 
+import com.kasilov.andrew.solidrobot.interfaces.IBatteryStatus;
+
 public class OldBattery extends Battery {
 
 
-    private boolean plugged = false;
-    private boolean charged = false;
+    private int chargeLevel = 0;
 
-    public void setPlugged(boolean plugged) {
-        this.plugged = plugged;
-    }
 
-    public void setCharged(boolean charged) {
-        this.charged = charged;
-    }
-
-    public boolean isCharged() {
-        return charged;
-    }
-
-    public boolean isPlugged() {
-        return plugged;
-    }
-
-    public boolean isIndicatorTurnedOn() {
-        return indicatorTurnedOn;
-    }
-
-    private boolean indicatorTurnedOn;
-
-    @Override
-    void charge() {
-
+    public OldBattery(IBatteryStatus iBatteryStatus) {
+        this.iBatteryStatus = iBatteryStatus;
+        this.setCharged(false);
     }
 
     @Override
-    protected void turnOnIndicator() {
-        throw new UnsupportedOperationException("It is not supported with this battery");
+    public void charge() {
+        new BatteryCharging().execute(10);
     }
 
     @Override
-    protected void turnOffIndicator() {
-        throw new UnsupportedOperationException("It is not supported with this battery");
+    public int getChargeLevel() {
+        return this.chargeLevel;
     }
+
+
+    @Override
+    void notifyBatteriesChargingIsFinished(Integer chargeLevel) {
+        this.chargeLevel = chargeLevel;
+    }
+
 }

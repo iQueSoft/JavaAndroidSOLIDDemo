@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">SOLIDRobot</string>
+    <string name="battery_plugged_out">Battery plugged out</string>
+    <string name="not_charging">Not charging</string>
+    <string name="not_moving">Not moving</string>
+    <string name="the_destination_is_not_reached">The destination is not reached</string>
+    <string name="battery_discharged">Battery discharged</string>
+    <string name="turn_on_robot">Turn On robot</string>
+    <string name="turn_off_robot">Turn off robot</string>
+    <string name="plug_in_new_type_battery">Plug in new type battery</string>
+    <string name="plug_out_new_type_battery">Plug out new type battery</string>
+    <string name="plug_in_charging_device">Plug in charging device</string>
+    <string name="plug_out_charging_device">Plug out charging device</string>
+    <string name="plug_in_old_type_battery">plug in old type battery</string>
+    <string name="plug_out_old_type_battery">plug out old type battery</string>
+    <string name="move">Move</string>
+    <string name="new_type_battery">New type battery</string>
+    <string name="robot_power">Robot power</string>
+    <string name="charging_device">Charging device</string>
+    <string name="old_type_battery">Old type battery</string>
 </resources>
